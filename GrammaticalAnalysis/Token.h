@@ -52,10 +52,13 @@ private:
     int column; //列
     TokenType type; //类型
     std::string value; //读入的值
+    bool isValid;
+
 public:
     Token();
-    Token(TokenType type);
-    Token(int line, int colum, TokenType type, std::string value);
+    Token(bool isValid);
+    Token(TokenType type,bool isValid);
+    Token(int line, int colum, TokenType type, std::string value,bool isValid);
     //如果输入的标识符是保留字就把它转换成相应的类型
     void checkKeyWord();
 
@@ -64,6 +67,7 @@ public:
     int getColumn();
     TokenType getType();
     std::string getValue();
+    bool isValidObject() const;
     //输出类中内容
     std::string toString();
 };
