@@ -3,7 +3,7 @@
 #include <fstream>
 #include <string>
 #include <list>
-#include<iostream>
+#include <iostream>
 #include "Token.h"
 
 class LexerResult
@@ -40,7 +40,7 @@ private:
     std::ifstream fileStream;
 
 public:
-    Lexer(std::ifstream&& fileStream);
+    Lexer(std::ifstream &&fileStream);
     // 返回词法分析的结果
     LexerResult getResult();
     // 词法分析的直接转向法
@@ -58,4 +58,6 @@ public:
     bool isDigit(int ch);
     // 判断是否为空格、制表符、回车符、换行符
     bool isBlank(int ch);
+    // 功能函数
+    Token createToken(TokenType type, const std::string &s, bool output);
 };
