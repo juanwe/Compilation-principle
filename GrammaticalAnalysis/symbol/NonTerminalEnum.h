@@ -16,7 +16,22 @@ enum class NON_TERMINAL
     TypeDecpart,
     TypeDec,
     TypeDecList,
-
+    TypeDecMore,
+    TypeId,
+    TypeDef,
+    BaseType,
+    StructureType,
+    ArrayType,
+    Low,
+    Top,
+    RecType,
+    FieldDecList,
+    FieldDecMore,
+    IdList,
+    IdMore,
+    VarDecpart,
+    VarDec,
+    VarDecList
 };
 
 // 枚举值的预测规则类
