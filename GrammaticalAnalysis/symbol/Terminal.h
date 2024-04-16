@@ -10,6 +10,7 @@ private:
     Token *token;
 public:
     Terminal(Token *token);
+    Terminal(TokenType tokenType);
     TreeNode *getNode();
 
     Token *getToken();
