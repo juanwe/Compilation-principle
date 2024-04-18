@@ -6,7 +6,6 @@
 class SyntaxTree{
 private:
     TreeNode* root;
-    std::ostream& out;
 public:
     SyntaxTree();
     SyntaxTree(TreeNode* root);

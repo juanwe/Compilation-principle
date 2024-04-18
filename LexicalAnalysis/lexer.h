@@ -37,10 +37,11 @@ private:
     int column = 0;
     int backtraceNumber = -1;
     bool lf = false;
+    std::string filename;
     std::ifstream fileStream;
-
 public:
-    Lexer(std::ifstream &&fileStream);
+    Lexer(std::string filename);
+    ~Lexer();
     // 返回词法分析的结果
     LexerResult getResult();
     // 词法分析的直接转向法

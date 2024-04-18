@@ -1,7 +1,7 @@
 #include "TreeNode.h"
 
 TreeNode::TreeNode(){}
-TreeNode::TreeNode(std::string value) {
+TreeNode::TreeNode(std::string& value) {
     this->value = value;
 }
 

@@ -13,7 +13,7 @@ private:
 
 public:
     TreeNode();
-    TreeNode(std::string value);
+    TreeNode(std::string& value);
     bool hasChild();
     bool hasSiblings();
 

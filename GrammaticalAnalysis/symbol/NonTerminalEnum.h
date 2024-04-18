@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include "../../LexicalAnalysis/Token.h"
 #include "Symbol.h"
 #include"Terminal.h"
@@ -62,18 +63,32 @@ enum class NON_TERMINAL
     CallStmRest,
     ActParamList,
     ActParamMore,
+    RelExp,
+    OtherRelE,
+    Exp,
+    OtherTerm,
+    Term,
+    OtherFactor,
+    Factor,
+    Variable,
+    VariMore,
+    FieldVar,
+    FieldVarMore,
+    CmpOp,
+    AddOp,
+    MultOp
 };
-
+// 将字符串映射到枚举值的函数
+NON_TERMINAL stringToNON_TERMINAL(const std::string &str);
 // 枚举值的预测规则类
 class NonTerminalEnum
 {
 public:
-    NonTerminalEnum(NON_TERMINAL type, const NonTerminal &nonTerminal);
+    NonTerminalEnum(NON_TERMINAL type);
 
     std::vector<std::shared_ptr<Symbol>> predict(Token token);
 
 private:
     NON_TERMINAL type;
-    NonTerminal nonTerminal;
     std::vector<std::shared_ptr<Symbol>> result;
 };

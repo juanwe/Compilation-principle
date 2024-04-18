@@ -3,8 +3,28 @@
 std::list<Token> LexerResult::getTokenList() { return tokenList; }
 void LexerResult::setTokenList(std::list<Token> tokenList) { this->tokenList = tokenList; }
 
-Lexer::Lexer(std::ifstream &&fileStream) : fileStream(std::move(fileStream))
+Lexer::Lexer(std::string filename)
 {
+    std::ofstream logFile(this->log_file_path, std::ios::app);
+    if (!logFile.is_open())
+    {
+        std::cerr << "无法打开日志文件" << log_file_path << std::endl;
+    }
+    this->filename = filename;
+    std::ifstream FS(this->filename);
+    if (!FS.is_open())
+    {
+        logFile << "无法打开字符输入流" << std::endl;
+    }else{
+        this->fileStream = std::move(FS);
+        FS.close();
+    }
+    logFile.close();
+}
+Lexer::~Lexer(){
+    if (fileStream.is_open()){
+        fileStream.close();
+    }
 }
 LexerResult Lexer::getResult()
 {
@@ -51,12 +71,12 @@ LexerResult Lexer::getResult()
 
 Token Lexer::getToken()
 {
-    std::ofstream fileStream(log_file_path);
-    if (!fileStream.is_open())
+    std::ofstream FS(log_file_path);
+    if (!FS.is_open())
     {
         std::cerr << "Failed to open the file in getToken" << std::endl;
     }
-    fileStream << "调用getToken方法" << std::endl;
+    FS << "调用getToken方法" << std::endl;
 
     Lexer::StateEnum stateEnum = Lexer::StateEnum::NORMAL;
     std::string s;
@@ -69,7 +89,7 @@ Token Lexer::getToken()
         if (stateEnum == NORMAL)
         {
 
-            fileStream << "进入Normal状态" << std::endl;
+            FS << "进入Normal状态" << std::endl;
             if (isAlpha(ch))
             {
                 stateEnum = Lexer::StateEnum::IN_ID;
@@ -151,58 +171,58 @@ Token Lexer::getToken()
             }
             else
             {
-                fileStream << "当前字符不在分析范围之内:" << showChar(ch) << '(' << ch << ")[" << this->line << "," << this->column << "]" << std::endl;
+                FS << "当前字符不在分析范围之内:" << showChar(ch) << '(' << ch << ")[" << this->line << "," << this->column << "]" << std::endl;
                 stateEnum = StateEnum::ERROR;
             }
         }
         else if (stateEnum == IN_ID)
         {
-            fileStream << "进入ID状态" << std::endl;
+            FS << "进入ID状态" << std::endl;
             if (isAlpha(ch) || isDigit(ch))
             {
                 stateEnum = StateEnum::IN_ID;
             }
             else
             {
-                fileStream << "当前字符已经不是标识符范围的了：" << showChar(ch) << "(" << ch << ")[" << line << ":" << column << "]" << std::endl;
-                fileStream << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << ":" << column << "]" << std::endl;
+                FS << "当前字符已经不是标识符范围的了：" << showChar(ch) << "(" << ch << ")[" << line << ":" << column << "]" << std::endl;
+                FS << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << ":" << column << "]" << std::endl;
                 backTrackChar(s.back());
                 token = Token(this->line, this->column, TokenType::ID, s.substr(0, s.length() - 1), true);
                 token.checkKeyWord();
-                fileStream << "已识别token:" << token.toString() << std::endl;
+                FS << "已识别token:" << token.toString() << std::endl;
                 return token;
             }
         }
         else if (stateEnum == IN_NUM)
         {
-            fileStream << "进入NUM状态" << std::endl;
+            FS << "进入NUM状态" << std::endl;
             if (!isDigit(ch))
             {
-                fileStream << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << ":" << column << "]" << std::endl;
+                FS << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << ":" << column << "]" << std::endl;
                 backTrackChar(s.back());
                 token = Token(this->line, this->column, TokenType::INTC, s.substr(0, s.length() - 1), true);
-                fileStream << "已识别token:" << token.toString() << std::endl;
+                FS << "已识别token:" << token.toString() << std::endl;
                 return token;
             }
         }
         else if (stateEnum == IN_ASSIGN)
         {
-            fileStream << "进入ASSIGN状态" << std::endl;
+            FS << "进入ASSIGN状态" << std::endl;
             if (ch == '=')
             {
                 token = Token(line, column, TokenType::ASSIGN, s, true);
-                fileStream << "已识别Token:" + token.toString() << std::endl;
+                FS << "已识别Token:" + token.toString() << std::endl;
                 return token;
             }
             else
             {
-                fileStream << "':'后面不是'='" << std::endl;
+                FS << "':'后面不是'='" << std::endl;
                 stateEnum = StateEnum::ERROR;
             }
         }
         else if (stateEnum == IN_COMMENT)
         {
-            fileStream << "进入COMMENT状态" << std::endl;
+            FS << "进入COMMENT状态" << std::endl;
             int tmpLine = this->line;
             int tmpColumn = this->column - 1;
             s.pop_back();
@@ -213,21 +233,21 @@ Token Lexer::getToken()
             stateEnum = StateEnum::NORMAL;
             if (ch != '}')
             {
-                fileStream << "没有注释结束符，注释结束符在:[" << tmpLine << ',' << tmpColumn << ']' << std::endl;
+                FS << "没有注释结束符，注释结束符在:[" << tmpLine << ',' << tmpColumn << ']' << std::endl;
                 stateEnum = StateEnum::ERROR;
             }
         }
         else if (stateEnum == IN_DOT)
         {
-            fileStream << "进入DOT状态" << std::endl;
+            FS << "进入DOT状态" << std::endl;
             if (isAlpha(ch))
             { // record域中的点运算符
-                fileStream << "record域中的点运算符" << std::endl;
-                fileStream << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << "," << column << "]" << std::endl;
+                FS << "record域中的点运算符" << std::endl;
+                FS << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << "," << column << "]" << std::endl;
                 backTrackChar(ch); // 回溯多读的字符
                 s.pop_back();
                 token = Token(line, column, TokenType::DOT, s, true);
-                fileStream << "已识别Token:" << token.toString() << std::endl;
+                FS << "已识别Token:" << token.toString() << std::endl;
                 return token;
             }
             else if (ch == '.')
@@ -244,37 +264,37 @@ Token Lexer::getToken()
             }
             if (ch == -1)
             { // 结束标志
-                fileStream << "结束标志" << std::endl;
+                FS << "结束标志" << std::endl;
                 token = Token(dotLine, dotColumn, TokenType::_EOF_, ".", true);
-                fileStream << "已识别Token:" << token.toString() << std::endl;
+                FS << "已识别Token:" << token.toString() << std::endl;
                 return token;
             }
             // 错误，回溯
-            fileStream << "错误的点运算符" << std::endl;
-            fileStream << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << "," << column << "]" << std::endl;
+            FS << "错误的点运算符" << std::endl;
+            FS << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << "," << column << "]" << std::endl;
             backTrackChar(ch);
             token = Token(line, column, TokenType::ERROR, s, true);
-            fileStream << "已识别Token:" << token.toString() << std::endl;
+            FS << "已识别Token:" << token.toString() << std::endl;
         }
         else if (stateEnum == IN_RANGE)
         {
-            fileStream << "进入RANGE状态" << std::endl;
+            FS << "进入RANGE状态" << std::endl;
             if (isDigit(ch))
             { // 如果是数组下标界限符，那么后面一定是数字
-                fileStream << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << "," << column << "]" << std::endl;
+                FS << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << "," << column << "]" << std::endl;
                 backTrackChar(ch);
                 s.pop_back();
                 token = Token(line, column, TokenType::ARRAY_BOUNDS, s, true);
-                fileStream << "已识别Token:" << token.toString() << std::endl;
+                FS << "已识别Token:" << token.toString() << std::endl;
                 return token;
             }
             // 如果后面不是数字，那么error
-            fileStream << "数组下标界限符后面不是数字" << std::endl;
+            FS << "数组下标界限符后面不是数字" << std::endl;
             stateEnum = StateEnum::ERROR;
         }
         else if (stateEnum == IN_CHAR)
         {
-            fileStream << "进入CHAR状态" << std::endl;
+            FS << "进入CHAR状态" << std::endl;
             if (isDigit(ch) || isAlpha(ch))
             {
                 // 判断后面是否跟着字符结束标志'\''
@@ -282,18 +302,18 @@ Token Lexer::getToken()
                 if (ch == '\'')
                 {
                     token = Token(line, column, TokenType::CHAR, s, true);
-                    fileStream << "已识别Token:" << token.toString() << std::endl;
+                    FS << "已识别Token:" << token.toString() << std::endl;
                     return token;
                 }
             }
             // 其他符号，error
-            fileStream << "没有字符结束标志" << std::endl;
+            FS << "没有字符结束标志" << std::endl;
             stateEnum = StateEnum::ERROR;
         }
         else if (stateEnum == ERROR)
         {
-            fileStream << "[Error] Unrecognized token. near " << line << ":" << column << std::endl;
-            fileStream << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << "," << column << "]" << std::endl;
+            FS << "[Error] Unrecognized token. near " << line << ":" << column << std::endl;
+            FS << "回溯字符：" << showChar(ch) << "(" << ch << ")[" << line << "," << column << "]" << std::endl;
             backTrackChar(ch);
             s.pop_back();
             token = Token(line, column, TokenType::ERROR, s, true);
@@ -308,9 +328,9 @@ Token Lexer::getToken()
     }
     if (stateEnum != NORMAL)
     {
-        fileStream << "[错误]在" << line << "行" << column << "列" << std::endl;
+        FS << "[错误]在" << line << "行" << column << "列" << std::endl;
     }
-    fileStream.close();
+    FS.close();
     return new Token();
 }
 void Lexer::backTrackChar(int ch)
@@ -352,15 +372,15 @@ int Lexer::getChar()
         column++;
         lf = false;
     }
-    std::ofstream fileStream(log_file_path);
-    if (!fileStream.is_open())
+    std::ofstream FS(log_file_path);
+    if (!FS.is_open())
     {
         std::cerr << "Failed to open the file" << std::endl;
     }
-    fileStream << "当前字符是：\""
+    FS << "当前字符是：\""
                << showChar(ch) << '(' << ch << ')'
                << '[' << line << ':' << column << ']' << std::endl;
-    fileStream.close();
+    FS.close();
     return ch;
 }
 std::string Lexer::showChar(int ch)
@@ -392,16 +412,16 @@ bool Lexer::isBlank(int ch)
 
 Token Lexer::createToken(TokenType type, const std::string &s, bool output)
 {
-    std::ofstream fileStream(log_file_path);
-    if (!fileStream.is_open())
+    std::ofstream FS(log_file_path);
+    if (!FS.is_open())
     {
         std::cerr << "Failed to open the file in createToken" << std::endl;
     }
     Token token(this->line, this->column, type, s, output);
     if (output)
     {
-        fileStream << "已识别Token:" << token.toString() << std::endl;
+        FS << "已识别Token:" << token.toString() << std::endl;
     }
-    fileStream.close();
+    FS.close();
     return token;
 }

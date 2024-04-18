@@ -1,8 +1,8 @@
 #include "SyntaxTree.h"
 
-SyntaxTree::SyntaxTree() : root(nullptr), out(std::cout) {} // 默认构造函数定义
+SyntaxTree::SyntaxTree() : root(nullptr) {} // 默认构造函数定义
 
-SyntaxTree::SyntaxTree(TreeNode *root) : root(root), out(std::cout) {} // 带参数构造函数定义
+SyntaxTree::SyntaxTree(TreeNode *root) : root(root) {} // 带参数构造函数定义
 
 // std::ostream& SyntaxTree::getOut()
 // {
@@ -30,24 +30,24 @@ void SyntaxTree::preOrderRecursiveCore(TreeNode *node, int level, int cnt, int *
         if (b[i] == 1)
         {
             std::cout << "|  ";
-            out << "|  ";
+            // out << "|  ";
         }
         else
         {
             std::cout << "   ";
-            out << "   ";
+            // out << "   ";
         }
     }
 
     if (node == root)
     {
         std::cout << node->getValue() << std::endl;
-        out << node->getValue() << std::endl;
+        // out << node->getValue() << std::endl;
     }
     else
     {
         std::cout << "|__" << node->getValue() << std::endl;
-        out << "|__" << node->getValue() << std::endl;
+        // out << "|__" << node->getValue() << std::endl;
     }
 
     if (node->hasChild())

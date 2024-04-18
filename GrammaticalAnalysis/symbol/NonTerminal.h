@@ -12,7 +12,7 @@ private:
 
 public:
     NonTerminal(std::string value);
-    TreeNode *getNode();
+    TreeNode *getNode() override;
     std::string getValue();
     bool isBlank();
 

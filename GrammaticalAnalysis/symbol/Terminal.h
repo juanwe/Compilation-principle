@@ -11,7 +11,7 @@ private:
 public:
     Terminal(Token *token);
     Terminal(TokenType tokenType);
-    TreeNode *getNode();
+    TreeNode *getNode() override;
 
     Token *getToken();
     

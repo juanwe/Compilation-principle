@@ -6,5 +6,5 @@
 class Symbol : public ToStringUtils
 {
 public:
-    TreeNode *getNode();
+    virtual TreeNode *getNode();
 };

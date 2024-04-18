@@ -2,7 +2,7 @@
 
 NonTerminal::NonTerminal(std::string value) : value(value), node(new TreeNode(value)) {}
 
-TreeNode *NonTerminal::getNode()
+TreeNode *NonTerminal::getNode() 
 {
     return node;
 }
